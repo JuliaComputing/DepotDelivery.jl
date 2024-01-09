@@ -3,7 +3,15 @@ uuid = "5c353f05-31b8-41b6-b09f-65e5456b8b1e"
 authors = ["Josh Day <emailjoshday@gmail.com> and contributors"]
 version = "1.0.0-DEV"
 
+[deps]
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+GZip = "92fee26a-97fe-5a0c-ad85-20a5f3185b63"
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+Scratch = "6c6a2e73-6563-6170-7368-637461726353"
+Tar = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
+
 [compat]
+Scratch = "1"
 julia = "1"
 
 [extras]
