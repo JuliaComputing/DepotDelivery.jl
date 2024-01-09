@@ -1,6 +1,13 @@
 using DepotDelivery
 using Test
 
-@testset "DepotDelivery.jl" begin
-    # Write your tests here.
-end
+b = BuildSpec()
+
+res = build(b, tar_predicates=Dict(
+    "no_artifacts" => path -> !occursin("artifacts", path),
+    "only_artifacts" => path -> occursin("artifacts", path),
+    ))
+
+path = res["host"]["no_artifacts"]
+
+Tar.extract(path, DepotDelivery.)
