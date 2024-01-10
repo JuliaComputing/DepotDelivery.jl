@@ -2,9 +2,12 @@
 
 [![Build Status](https://github.com/joshday/DepotDelivery.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/joshday/DepotDelivery.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
-**DepotDelivery** provides a mechanism of delivering standalone Julia applications into environments where Julia is already installed.
 
-It uses Julia's fantastic Pkg/Artifacts system to "cross compile" for different platforms.
+## Why Would I Use This?
+
+1. You're trying to install software within an air-gapped environment.
+2. Julia is already installed.
+3. The install environment may be different than the build environment.
 
 
 ## Usage
@@ -16,7 +19,3 @@ b = BuildSpec(path_to_project_toml; platform = Base.BinaryPlatforms.HostPlatform
 
 path = build(b)
 ```
-
-## Why Would I Use This?
-
-- This is really only useful for installing into air-gapped environments.
