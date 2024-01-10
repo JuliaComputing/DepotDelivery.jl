@@ -9,5 +9,3 @@ res = build(b, tar_predicates=Dict(
     ))
 
 path = res["host"]["no_artifacts"]
-
-Tar.extract(path, DepotDelivery.)

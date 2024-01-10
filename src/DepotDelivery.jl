@@ -1,96 +1,94 @@
 module DepotDelivery
 
-using Dates, Distributed, Pkg, Scratch, Tar
+using Dates, Distributed, Pkg, Scratch
 
 export BuildSpec, build, clear!
 
-#-----------------------------------------------------------------------------# __init__
-PROJECT::String = ""   # /PROJECTS/$project_root
-VALIDATE::String = ""  # /VALIDATE/$project_root
-RELEASES::String = ""   # /RELEASES/$(proj.uuid)/$platform/$predicate.tar
-DEPOTS::String = ""     # /DEPOTS/$(proj.uuid)/
+#-----------------------------------------------------------------------------# init
+BUILDS::String = ""
+SANDBOX::String = ""
 
 function __init__()
-    global PROJECT = @get_scratch!("PROJECT")
-    global VALIDATE = @get_scratch!("VALIDATE")
-    global RELEASES = @get_scratch!("RELEASES")
-    global DEPOTS = @get_scratch!("DEPOTS")
+    global BUILDS = get_scratch!(DepotDelivery, "BUILDS")
+    global SANDBOX = get_scratch!(DepotDelivery, "SANDBOX")
 end
 
 #-----------------------------------------------------------------------------# utils
-clear!() = clear_scratch!(DepotDelivery)
+clear!() = clear_scratchspaces!(DepotDelivery)
 
-default_drop_patterns::Vector{String} = [".git", ".gitignore"]
+mk_empty_path(path) = (rm(path; force=true, recursive=true); mkpath(path))
 
-default_predicate(path) = !any(x -> occursin(x, path), default_drop_patterns)
+function set_depot!(path::String)
+    push!(empty!(DEPOT_PATH), path)
+    ENV["JULIA_DEPOT_PATH"] = path  # used by spawned worker processes (is this needed?)
+end
+
+#-----------------------------------------------------------------------------# sandbox
+function sandbox(f::Function)
+    path = mk_empty_path(SANDBOX)
+
+    current_project = Base.current_project()
+    depot_path = copy(DEPOT_PATH)
+    _depot_path = get(ENV, "JULIA_DEPOT_PATH", nothing)
+    _precomp = get(ENV, "JULIA_PKG_PRECOMPILE_AUTO", nothing)
+    try
+        cd(path) do
+            Pkg.activate("path")
+            ENV["JULIA_DEPOT_PATH"] = path
+            ENV["JULIA_PKG_PRECOMPILE_AUTO"] = "0"
+            f()
+        end
+    catch ex
+        rethrow(ex)
+    finally
+        Pkg.activate(current_project)
+        append!(empty!(DEPOT_PATH), depot_path)
+        isnothing(_depot_path) ? delete!(ENV, "JULIA_DEPOT_PATH") : (ENV["JULIA_DEPOT_PATH"] = _depot_path)
+        isnothing(_precomp) ? delete!(ENV, "JULIA_PKG_PRECOMPILE_AUTO") : (ENV["JULIA_PKG_PRECOMPILE_AUTO"] = _precomp)
+    end
+end
 
 #-----------------------------------------------------------------------------# BuildSpec
 Base.@kwdef struct BuildSpec
-    project_file::String = Base.current_project()
-    project::Pkg.Types.Project = Pkg.Types.read_project(project_file)
-    platforms::Dict{String, Base.BinaryPlatforms.AbstractPlatform} = Dict("host" => Base.BinaryPlatforms.HostPlatform())
-    tar_predicates::Dict{String, Function} = Dict("default" => default_predicate)
+    project_file::String        = Base.current_project()
+    project::Pkg.Types.Project  = Pkg.Types.read_project(project_file)
+    platform::Base.BinaryPlatforms.AbstractPlatform = Base.BinaryPlatforms.HostPlatform()
+    add_startup::Bool           = true
+end
+function Base.show(io::IO, b::BuildSpec)
+    print(io, "BuildSpec:", join(("\n    • $x: $(getfield(b, x))") for x in [:project_file, :platform, :add_startup]))
 end
 
-function paths(b::BuildSpec)
-    uuid = b.project.uuid
-    out = (; depot = joinpath(DEPOTS, uuid), releases = joinpath(RELEASES, uuid))
-    foreach(out) do x
-        rm(x; force=true, recursive=true)
-        mkpath(x)
-    end
-    return out
-end
-
-
-#-----------------------------------------------------------------------------# build
 function build(b::BuildSpec)
     name = b.project.name
-    uuid = string(b.project.uuid)
-    depot, releases = paths(b)
+    sandbox() do
+        project_root = mkpath(joinpath("dev", name))
+        set_depot!(pwd())
+        cp(dirname(b.project_file), project_root; force=true)
+        Pkg.activate(project_root)
+        Pkg.instantiate(; platform = b.platform)
+        mkdir("config")
+        write(joinpath("config", "buildspec.jld"), string(b))
+        if b.add_startup
+            content = """
+            ENV["JULIA_DEPOT_PATH"] = joinpath(@__DIR__, "..")
 
-    # Create the output, nested dict of: [platform][predicate] => path
-    out = Dict{String, Dict{String, String}}(name => Dict{String, String}() for name in keys(b.platforms))
+            import Pkg, Serialization
 
-    # Things that need to be restored in `finally`
-    _project = Base.current_project()
-    _depot_path = DEPOT_PATH
-    _precomp_auto = get(ENV, "JULIA_PKG_PRECOMPILE_AUTO", nothing)
+            Pkg.activate(joinpath(@__DIR__, "..", "dev", "$name"))
 
-    try
-        # Change the depot to our empty one
-        push!(empty!(DEPOT_PATH), depot)
+            using $name
 
-        # Copy the entire project directory into `depot/dev/$project_name` and activate it
-        depot_dev = mkpath(joinpath(depot, "dev", proj.name))
-        cp(dirname(b.project_file), depot_dev; force=true)
-        Pkg.activate(depot_dev)
+            __build_spec__ = read(joinpath(@__DIR__, "..", "config", "buildspec.jld"), String)
 
-
-        for (platform_name, platform) in pairs(b.platforms)
-            # For each platform, wipe `artifacts/` and instantiate the project
-            rm(joinpath(depot, "artifacts"); recursive=true, force=true)
-            Pkg.instantiate(; platform)
-
-            # Now that depot is populated, apply each predicate to create tarballs
-            for (predicate_name, predicate) in b.tar_predicates
-                path = joinpath(releases, platform_name, predicate_name * ".tar")
-                mkpath(dirname(path))
-
-                @info "Creating tarball for platform `$platform` with predicate `$predicate_name`..."
-                Tar.create(predicate, depot, path; portable=true)
-                out[platform_name][predicate_name] = path
-            end
+            nothing
+            """
+            write(joinpath("config", "startup.jl"), content)
         end
-    catch ex
-        @warn "An error occured while building tarballs."
-        rethrow(ex)
-    finally
-        Pkg.activate(_project)
-        isnothing(_precomp_auto) || (ENV["JULIA_PKG_PRECOMPILE_AUTO"] = _precomp_auto)
-        append!(empty!(DEPOT_PATH), _depot_path)
+
+        build_dir = mkpath(joinpath(BUILDS, name))
+        cp(pwd(), joinpath(build_dir, "build_$(Dates.format(now(), "yyyymmdd-HHMMSS"))"))
     end
-    return out
 end
 
 
