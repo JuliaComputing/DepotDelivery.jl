@@ -14,14 +14,14 @@
 ## Usage
 
 ```julia
-using DepotDelivery
+using DepotDelivery: build_depot
 
-path = DepotDelivery.build_depot("Project.toml"; platform = Base.BinaryPlatforms.HostPlatform())
+path = build_depot("Project.toml"; platform = Base.BinaryPlatforms.HostPlatform())
 ```
 
 ## Building for Non-Host Platforms
 
-- To build for a non-host platform, provide any `Base.BinaryPlatforms.AbstractPlatform` as the `platform` argument.
+- Use any `Base.BinaryPlatforms.AbstractPlatform` as the `platform` argument.
 - See [Julia's supported OS/architectures](https://www.julialang.org/downloads/index.html#supported_platforms).
 - See `?Base.BinaryPlatforms.Platform` and the types in `Pkg.BinaryPlatforms` for details, e.g.
 
