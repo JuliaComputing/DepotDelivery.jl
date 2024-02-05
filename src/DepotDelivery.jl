@@ -65,16 +65,7 @@ end
 #-----------------------------------------------------------------------------# test_build
 function test_build(path::String; kw...)
     Malt.remote_eval_fetch(worker, quote
-        path = $path
-        import Pkg, TOML
-
-        build_spec = TOML.parsefile(joinpath(path, "config", "buildspec.toml"))
-
-        push!(empty!(DEPOT_PATH), path)
-        Pkg.activate(path)
-        Pkg.test(; $kw...)
-
-        @info "Testing depot with build_spec" build_spec
+        include(joinpath($path, "config", "depot_startup.jl"))
     end)
 end
 
