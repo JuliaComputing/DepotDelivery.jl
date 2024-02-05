@@ -28,7 +28,7 @@ path = build_depot("Project.toml"; platform = Base.BinaryPlatforms.HostPlatform(
 ```julia
 import Pkg
 
-Platform("windows", "x86_64"; cuda == "10.1")
+Base.BinaryPlatforms.Platform("windows", "x86_64"; cuda == "10.1")
 
 # `arch` argument must be in (:x86_64, :i686m, :armv7l, :armv6l, :aarch64, :powerpc64le)
 Pkg.BinaryPlatforms.Windows(:x86_64)
