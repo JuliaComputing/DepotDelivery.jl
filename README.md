@@ -2,20 +2,37 @@
 
 [![Build Status](https://github.com/joshday/DepotDelivery.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/joshday/DepotDelivery.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
+<p align="center"><b>DepotDelivery</b> bundles a Julia project into a standalone depot that can run in air-gapped environments.</p>
 
-## Why Would I Use This?
 
-1. You're trying to install software within an air-gapped environment.
-2. Julia is already installed.
-3. The install environment may be different than the build environment.
 
+## Features
+
+- Bundles all necessary Julia code and artifacts needed to run without internet access.
+- Build for platforms other than the host platform.
 
 ## Usage
 
 ```julia
 using DepotDelivery
 
-b = BuildSpec(path_to_project_toml; platform = Base.BinaryPlatforms.HostPlatform())
+path = DepotDelivery.build_depot("Project.toml"; platform = Base.BinaryPlatforms.HostPlatform())
+```
 
-path = build(b)
+## Building for Non-Host Platforms
+
+- To build for a non-host platform, provide any `Base.BinaryPlatforms.AbstractPlatform` as the `platform` argument.
+- See [Julia's supported OS/architectures](https://www.julialang.org/downloads/index.html#supported_platforms).
+- See `?Base.BinaryPlatforms.Platform` and the types in `Pkg.BinaryPlatforms` for details, e.g.
+
+```julia
+import Pkg
+
+Platform("windows", "x86_64"; cuda == "10.1")
+
+# `arch` argument must be in (:x86_64, :i686m, :armv7l, :armv6l, :aarch64, :powerpc64le)
+Pkg.BinaryPlatforms.Windows(:x86_64)
+Pkg.BinaryPlatforms.MacOS()
+Pkg.BinaryPlatforms.Linux(:powerpc64le)
+Pkg.BinaryPlatforms.FreeBSD(:armv7l)
 ```
