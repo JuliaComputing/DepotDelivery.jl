@@ -19,6 +19,11 @@ using DepotDelivery: build_depot
 path = build_depot("Project.toml"; platform = Base.BinaryPlatforms.HostPlatform())
 ```
 
+- `path` is the ready-to-ship depot.
+- Your project lives at `path/dev/MyProject`.
+- The build settings live in `path/config/depot_build.toml`
+- Run this in the airgapped environment to get started: `include("$path/config/depot_startup.jl")`.
+
 ## Building for Non-Host Platforms
 
 - Use any `Base.BinaryPlatforms.AbstractPlatform` as the `platform` argument.
