@@ -41,3 +41,8 @@ Pkg.BinaryPlatforms.MacOS()
 Pkg.BinaryPlatforms.Linux(:powerpc64le)
 Pkg.BinaryPlatforms.FreeBSD(:armv7l)
 ```
+
+## Limitations
+
+- The parts of your dependencies that expect/require internet access will not work (this should be expected).
+- It's assumed your package is completely standalone, and won't need to be used with packages outside of the provided project file.
