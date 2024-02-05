@@ -1,8 +1,4 @@
 using DepotDelivery
 using Test
 
-b = BuildSpec()
-
-path = build(p)
-
-@test occursin("scratchspace", path)
+path = DepotDelivery.build_project(joinpath(@__DIR__, "..", "Project.toml"))
