@@ -1,6 +1,6 @@
 # DepotDelivery
 
-[![Build Status](https://github.com/joshday/DepotDelivery.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/joshday/DepotDelivery.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Build Status](https://github.com/juliacomputing/DepotDelivery.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/juliacomputing/DepotDelivery.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
 <p align="center"><b>DepotDelivery</b> bundles a Julia project into a standalone depot that can run in air-gapped environments.</p>
 
