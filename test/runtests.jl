@@ -1,4 +1,6 @@
 using DepotDelivery
 using Test
 
-path = DepotDelivery.build_project(joinpath(@__DIR__, "..", "Project.toml"))
+depot = DepotDelivery.build(joinpath(@__DIR__, ".."))
+
+@test DepotDelivery.test(depot)
