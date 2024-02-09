@@ -14,15 +14,15 @@
 ## Usage
 
 ```julia
-using DepotDelivery: build_depot
+using DepotDelivery: build
 
-path = build_depot("Project.toml"; platform = Base.BinaryPlatforms.HostPlatform())
+path = build(path_to_project; platform = Base.BinaryPlatforms.HostPlatform())
 ```
 
 - `path` is the ready-to-ship depot.
-- Your project lives at `path/dev/MyProject`.
-- The build settings live in `path/config/depot_build.toml`
-- Run this in the airgapped environment to get started: `include("$path/config/depot_startup.jl")`.
+- Your project lives at `$path/dev/MyProject`.
+- The build settings live in `$path/config/depot_build.toml`
+- Run this in the production environment to get started: `include("$path/config/depot_startup.jl")`.
 
 ## Building for Non-Host Platforms
 
