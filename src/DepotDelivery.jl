@@ -23,6 +23,7 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform())
     try
         proj_file = joinpath(path, "Project.toml")
         proj_file = isfile(proj_file) ? proj_file : joinpath(path, "JuliaProject.toml")
+        isfile(proj_file) || error("No Project.toml or JuliaProject.toml found in `$path`.")
         proj = TOML.parsefile(proj_file)
         name = proj["name"]
         build_spec = Dict(
