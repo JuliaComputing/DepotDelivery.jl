@@ -2,6 +2,8 @@ module DepotDelivery
 
 using Dates, InteractiveUtils, Pkg, TOML
 
+#-----------------------------------------------------------------------------# State
+# Things we change before Pkg.instantiate-ing and need to restore.
 @kwdef struct State
     depot_path = copy(DEPOT_PATH)
     precomp = get(ENV, "JULIA_PKG_PRECOMPILE_AUTO", nothing)
