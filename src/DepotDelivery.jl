@@ -15,6 +15,18 @@ function restore!!(s::State)
     append!(empty!(DEPOT_PATH), s.depot_path)
 end
 
+function sandbox(f::Function)
+    State = State()
+    try
+        f()
+    catch ex
+        @warn "DepotDelivery.sandbox failed"
+        rethrow(ex)
+    finally
+        restore!!(State)
+    end
+end
+
 #-----------------------------------------------------------------------------# build
 function build(path::String; platform = Base.BinaryPlatforms.HostPlatform())
     state = State()
@@ -61,6 +73,7 @@ function startup_script(depot_path::String, proj_name::String)
     import Pkg
     ENV["JULIA_DEPOT_PATH"] = "$depot_path"  # Needed for Distributed.jl to work
     push!(empty!(DEPOT_PATH), "$depot_path")
+    Pkg.activate(joinpath("$depot_path", "dev", "$proj_name"))
     using $proj_name
     @info "Depot `$depot_path` initialized with project `$proj_name`."
     """
