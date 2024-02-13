@@ -16,23 +16,22 @@ function restore!!(s::State)
 end
 
 function sandbox(f::Function)
-    State = State()
+    state = State()
     try
         f()
     catch ex
         @warn "DepotDelivery.sandbox failed"
         rethrow(ex)
     finally
-        restore!!(State)
+        restore!!(state)
     end
 end
 
 #-----------------------------------------------------------------------------# build
 function build(path::String; platform = Base.BinaryPlatforms.HostPlatform())
-    state = State()
     path = abspath(path)
     depot = mktempdir()
-    try
+    sandbox() do
         proj_file = joinpath(path, "Project.toml")
         proj_file = isfile(proj_file) ? proj_file : joinpath(path, "JuliaProject.toml")
         isfile(proj_file) || error("No Project.toml or JuliaProject.toml found in `$path`.")
@@ -57,11 +56,6 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform())
 
         open(io -> TOML.print(io, build_spec), joinpath(depot, "config", "depot_build.toml"), "w")
         open(io -> print(io, startup_script(name)), joinpath(depot, "config", "depot_startup.jl"), "w")
-    catch ex
-        @warn "DepotDelivery.build failed"
-        rethrow(ex)
-    finally
-        restore!!(state)
     end
 
     return depot
