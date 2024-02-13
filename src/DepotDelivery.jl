@@ -65,7 +65,7 @@ end
 startup_script(name) = """
     import Pkg
     let
-        depot = joinpath(@__DIR__, "..")
+        depot = abspath(joinpath(@__DIR__, ".."))
         ENV["JULIA_DEPOT_PATH"] = depot
         push!(empty!(DEPOT_PATH), depot)
         @info "Initializing Depot `\$depot` with project `$name`."
