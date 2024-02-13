@@ -56,7 +56,7 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform())
         Pkg.instantiate()
 
         open(io -> TOML.print(io, build_spec), joinpath(depot, "config", "depot_build.toml"), "w")
-        open(io -> print(io, startup_script(depot, name)), joinpath(depot, "config", "depot_startup.jl"), "w")
+        open(io -> print(io, startup_script(name)), joinpath(depot, "config", "depot_startup.jl"), "w")
     catch ex
         @warn "DepotDelivery.build failed"
         rethrow(ex)
@@ -68,16 +68,17 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform())
 end
 
 #-----------------------------------------------------------------------------# startup_script
-function startup_script(depot_path::String, proj_name::String)
-    """
+startup_script(name) = """
     import Pkg
-    ENV["JULIA_DEPOT_PATH"] = "$depot_path"  # Needed for Distributed.jl to work
-    push!(empty!(DEPOT_PATH), "$depot_path")
-    Pkg.activate(joinpath("$depot_path", "dev", "$proj_name"))
-    using $proj_name
-    @info "Depot `$depot_path` initialized with project `$proj_name`."
+    proj = let
+        depot = joinpath(@__DIR__, "..")
+        ENV["JULIA_DEPOT_PATH"] = depot
+        push!(empty!(DEPOT_PATH), depot)
+        @info "Initializing Depot `\$depot` with project `$name`."
+        only(readdir(joinpath(depot, "dev")))
+    end
+    using $name
     """
-end
 
 #-----------------------------------------------------------------------------# test
 function test(depot_path::String)
