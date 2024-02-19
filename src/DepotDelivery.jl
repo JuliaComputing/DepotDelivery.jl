@@ -51,6 +51,7 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform())
 
         cp(path, joinpath(depot, "dev", name))
         Pkg.activate()
+        Pkg.develop(name)
         Pkg.instantiate(; platform)
 
         open(io -> TOML.print(io, build_spec), joinpath(depot, "config", "depot_build.toml"), "w")

@@ -1,7 +1,7 @@
 name = "DepotDelivery"
 uuid = "5c353f05-31b8-41b6-b09f-65e5456b8b1e"
 authors = ["Josh Day <emailjoshday@gmail.com> and contributors"]
-version = "0.1.4"
+version = "0.1.5"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
