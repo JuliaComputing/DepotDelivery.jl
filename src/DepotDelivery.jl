@@ -51,7 +51,6 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform())
 
         cp(path, joinpath(depot, "dev", name))
         Pkg.activate()
-        Pkg.develop(path=joinpath(depot, "dev", name))
         Pkg.instantiate()
 
         open(io -> TOML.print(io, build_spec), joinpath(depot, "config", "depot_build.toml"), "w")
@@ -66,8 +65,9 @@ startup_script(name) = """
     import Pkg
     let
         depot = abspath(joinpath(@__DIR__, ".."))
-        ENV["JULIA_DEPOT_PATH"] = depot
-        push!(empty!(DEPOT_PATH), depot)
+        Pkg.activate(joinpath(depot, "dev", "$name"))
+        ENV["JULIA_DEPOT_PATH"] = depot   # For Distributed.jl workers
+        push!(empty!(DEPOT_PATH), depot)  # For current process
         @info "Initializing Depot `\$depot` with project `$name`."
     end
     using $name
