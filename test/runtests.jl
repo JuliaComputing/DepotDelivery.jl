@@ -20,6 +20,7 @@ end
 
 print_file_tree(joinpath(depot, "artifacts"))  # debugging artifacts in CI
 
+sleep(1)  # give time for the logs to flush
 
 DepotDelivery.sandbox() do
     include(joinpath(depot, "config", "depot_startup.jl"))
