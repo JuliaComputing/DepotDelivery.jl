@@ -9,15 +9,17 @@ depot = DepotDelivery.build(joinpath(@__DIR__, "TestProject"))
 # debugging artifacts in CI
 function print_file_tree(path, depth=0)
     if isfile(path)
-        printstyled(stdout, "    " ^ depth, basename(path), '\n', color=:light_blue)
+        printstyled("    " ^ depth, basename(path), '\n', color=:light_blue)
     else
-        println(stdout, "    " ^ depth, basename(path), "/")
+        println("    " ^ depth, basename(path), "/")
         for f in readdir(path)
             print_file_tree(joinpath(path, f), depth + 1)
         end
     end
 end
 
+@info isdir(depot)
+@info readdir(depot)
 print_file_tree(joinpath(depot, "artifacts"))  # debugging artifacts in CI
 
 sleep(1)  # give time for the logs to flush
