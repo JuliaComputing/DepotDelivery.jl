@@ -49,9 +49,8 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform())
         push!(empty!(DEPOT_PATH), depot)
         ENV["JULIA_PKG_PRECOMPILE_AUTO"] = "0"  # Needed when building for non-host platforms
 
-        cp(path, joinpath(depot, "dev", name))
-        Pkg.activate()
-        Pkg.develop(name)
+        cp(path, joinpath(depot, "dev", name))  # Copy project into dev/
+        Pkg.activate(joinpath(depot, "dev", name))
         Pkg.instantiate(; platform)
 
         open(io -> TOML.print(io, build_spec), joinpath(depot, "config", "depot_build.toml"), "w")
@@ -82,6 +81,21 @@ function test(depot_path::String)
     """
     process = run(`$(Base.julia_cmd()) -e $script`)
     process.exitcode == 0
+end
+
+# Check that artifacts do not contains certain file extensions, e.g.:
+# If you build for windows, you should not have .dylib files
+# If you build for linux, you should not have .dll files
+function _check_artifacts(depot_path::String, not=[".dylib"])
+    for (root, dirs, files) in walkdir(joinpath(depot_path, "artifacts"))
+        for file in files
+            ext = lowercase(splitext(file)[2])
+            if ext ∈ not
+                @warn "Found unexpected artifact: $file"
+            end
+        end
+    end
+    return true
 end
 
 end  # DepotDelivery module

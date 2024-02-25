@@ -1,0 +1,5 @@
+name = "TestProject"
+uuid = "f3e3185f-ad83-4044-845c-222ba027dc34"
+
+[deps]
+HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
