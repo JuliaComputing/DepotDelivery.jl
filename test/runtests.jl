@@ -18,13 +18,13 @@ function print_file_tree(path, depth=0)
     end
 end
 
-@info isdir(depot)
-@info readdir(depot)
-print_file_tree(joinpath(depot, "artifacts"))  # debugging artifacts in CI
 
-sleep(1)  # give time for the logs to flush
 
 DepotDelivery.sandbox() do
+    @info isdir(depot)
+    @info readdir(depot)
+    print_file_tree(joinpath(depot, "artifacts"))  # debugging artifacts in CI
+
     include(joinpath(depot, "config", "depot_startup.jl"))
     @test !occursin(".julia", pathof(TestProject))
     @test !occursin(".julia", pathof(TestProject.HDF5))
