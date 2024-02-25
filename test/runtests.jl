@@ -9,4 +9,5 @@ depot = DepotDelivery.build(joinpath(@__DIR__, "TestProject"))
 DepotDelivery.sandbox() do
     include(joinpath(depot, "config", "depot_startup.jl"))
     @test !occursin(".julia", pathof(TestProject))
+    @test !occursin(".julia", pathof(TestProject.HDF5))
 end
