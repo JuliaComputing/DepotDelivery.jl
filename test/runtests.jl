@@ -18,10 +18,11 @@ function print_file_tree(path, depth=0)
     end
 end
 
+print_file_tree(joinpath(depot, "artifacts"))  # debugging artifacts in CI
+
 
 DepotDelivery.sandbox() do
     include(joinpath(depot, "config", "depot_startup.jl"))
-    print_file_tree(joinpath(depot, "artifacts"))  # debugging artifacts in CI
     @test !occursin(".julia", pathof(TestProject))
     @test !occursin(".julia", pathof(TestProject.HDF5))
 end
