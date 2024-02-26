@@ -29,7 +29,6 @@ end
 
 #-----------------------------------------------------------------------------# build
 function build(path::String; platform = Base.BinaryPlatforms.HostPlatform())
-    path = abspath(path)
     depot = mktempdir()
     sandbox() do
         proj_file = joinpath(path, "Project.toml")
