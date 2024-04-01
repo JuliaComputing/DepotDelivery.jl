@@ -75,8 +75,8 @@ startup_script(name) = """
 #-----------------------------------------------------------------------------# test
 function test(depot_path::String)
     script = """
-    @info "Loading the depot_startup.jl script"
-    include("$(joinpath(depot_path, "config", "depot_startup.jl"))")
+    @info "DepotDelivery.test: Loading the depot_startup.jl script"
+    include(raw"$(joinpath(depot_path, "config", "depot_startup.jl"))")
     """
     process = run(`$(Base.julia_cmd()) -e $script`)
     process.exitcode == 0
