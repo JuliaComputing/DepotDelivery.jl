@@ -52,12 +52,17 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform(), ver
         Pkg.activate(joinpath(depot, "dev", name))
         Pkg.instantiate(; platform, verbose)
 
-        # Ensure all artifacts (including lazy ones) are installed for the correct platform
-        manifest_file = replace(proj_file, "Project" => "Manifest")
-        for (uuid, entry) in Pkg.Types.read_manifest(manifest_file)
-            src = Pkg.dir(entry.name)  # How to get the source directory of a package?
-            # find entry's Artifacts.toml
-        end
+        # # Ensure all artifacts (including lazy ones) are installed for the correct platform
+        # manifest_file = replace(proj_file, "Project" => "Manifest")
+        # for (uuid, entry) in Pkg.Types.read_manifest(manifest_file)
+        #     artifacts_path = @eval let
+        #         name = $(Symbol(entry.name))
+        #         @eval import name
+        #         Pkg.Artifacts.find_artifacts_toml(pathof(name))
+        #     end
+        #     isnothing(artifacts_path) && continue
+        #     Pkg.Artifacts.select_downloadable_artifacts(entry.name; platform, include_lazy=true)
+        # end
 
 
         open(io -> TOML.print(io, build_spec), joinpath(depot, "config", "depot_build.toml"), "w")

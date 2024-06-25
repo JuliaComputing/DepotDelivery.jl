@@ -8,6 +8,7 @@ depot = DepotDelivery.build(joinpath(@__DIR__, "TestProject"))
 
 DepotDelivery.sandbox() do
     include(joinpath(depot, "config", "depot_startup.jl"))
+    @test !any(x -> occursin(".julia", x), DEPOT_PATH) # Ensure DEPOT_PATH changed
     @test !occursin(".julia", pathof(TestProject))
     @test !occursin(".julia", pathof(TestProject.HDF5))
     @test !occursin(".julia", pathof(TestProject.HDF5.API.HDF5_jll))
