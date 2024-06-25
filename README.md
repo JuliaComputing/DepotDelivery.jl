@@ -47,8 +47,3 @@ Pkg.BinaryPlatforms.FreeBSD(:armv7l)
 
 - The parts of your dependencies that expect/require internet access will not work (this should be expected).
 - It's assumed your package is completely standalone, and won't need to be used with packages outside of the provided project file.
-
-
-## Gotchas
-
-- Currently doesn't work with `Pkg.dev`-ed dependencies.
