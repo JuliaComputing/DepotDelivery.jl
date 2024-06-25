@@ -28,7 +28,7 @@ function sandbox(f::Function)
 end
 
 #-----------------------------------------------------------------------------# build
-function build(path::String; platform = Base.BinaryPlatforms.HostPlatform())
+function build(path::String; platform = Base.BinaryPlatforms.HostPlatform(), verbose=true)
     depot = mktempdir()
     sandbox() do
         proj_file = joinpath(path, "Project.toml")
@@ -38,7 +38,7 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform())
         name = proj["name"]
         build_spec = Dict(
             :datetime => Dates.now(),
-            :versioninfo => (buf = IOBuffer(); InteractiveUtils.versioninfo(buf); String(take!(buf))),
+            :versioninfo => sprint(InteractiveUtils.versioninfo),
             :project_file => proj_file,
             :project => proj,
             :platform => string(platform)
@@ -50,7 +50,15 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform())
 
         cp(path, joinpath(depot, "dev", name))  # Copy project into dev/
         Pkg.activate(joinpath(depot, "dev", name))
-        Pkg.instantiate(; platform)
+        Pkg.instantiate(; platform, verbose)
+
+        # Ensure all artifacts (including lazy ones) are installed for the correct platform
+        manifest_file = replace(proj_file, "Project" => "Manifest")
+        for (uuid, entry) in Pkg.Types.read_manifest(manifest_file)
+            src = Pkg.dir(entry.name)  # How to get the source directory of a package?
+            # find entry's Artifacts.toml
+        end
+
 
         open(io -> TOML.print(io, build_spec), joinpath(depot, "config", "depot_build.toml"), "w")
         open(io -> print(io, startup_script(name)), joinpath(depot, "config", "depot_startup.jl"), "w")

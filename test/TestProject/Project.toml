@@ -3,3 +3,4 @@ uuid = "f3e3185f-ad83-4044-845c-222ba027dc34"
 
 [deps]
 HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
+HDF5_jll = "0234f1f7-429e-5d53-9886-15a909be8d59"
