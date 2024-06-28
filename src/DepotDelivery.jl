@@ -10,7 +10,7 @@ using Dates, InteractiveUtils, Pkg, TOML
     project = Base.current_project()
 end
 function restore!!(s::State)
-    Pkg.activate(s.project)
+    isnothing(s.project) ? Pkg.activate() : Pkg.activate(s.project)
     isnothing(s.precomp) || (ENV["JULIA_PKG_PRECOMPILE_AUTO"] = s.precomp)
     append!(empty!(DEPOT_PATH), s.depot_path)
 end
@@ -29,6 +29,7 @@ end
 
 #-----------------------------------------------------------------------------# build
 function build(path::String; platform = Base.BinaryPlatforms.HostPlatform(), verbose=true)
+    path = abspath(path)
     depot = mktempdir()
     sandbox() do
         proj_file = joinpath(path, "Project.toml")
@@ -86,7 +87,7 @@ function test(depot_path::String)
     @info "DepotDelivery.test: Loading the depot_startup.jl script"
     include(raw"$(joinpath(depot_path, "config", "depot_startup.jl"))")
     """
-    process = run(`$(Base.julia_cmd()) -e $script`)
+    process = run(`$(Base.julia_cmd()) --startup-file=no -e $script`)
     process.exitcode == 0
 end
 
