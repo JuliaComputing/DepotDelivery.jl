@@ -17,7 +17,7 @@
 using DepotDelivery: build
 
 # Assumes `path/Project.toml` exists (or `path/JuliaProject.toml`)
-path = build(path; platform = Base.BinaryPlatforms.HostPlatform())
+path = build(path_to_project; platform = Base.BinaryPlatforms.HostPlatform())
 ```
 
 - `path` is the ready-to-ship depot.
