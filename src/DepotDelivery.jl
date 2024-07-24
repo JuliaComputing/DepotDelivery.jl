@@ -28,7 +28,7 @@ function sandbox(f::Function)
 end
 
 #-----------------------------------------------------------------------------# build
-function build(path::String; platform = Base.BinaryPlatforms.HostPlatform(), verbose=true, depot = mktempdir())
+function build(path::String; platform = Base.BinaryPlatforms.HostPlatform(), verbose=true, depot = mktempdir(), precompiled=false)
     path = abspath(path)
     mkpath(depot)
     sandbox() do
@@ -47,7 +47,9 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform(), ver
         mkpath(joinpath(depot, "config"))
         mkpath(joinpath(depot, "dev", name))
         push!(empty!(DEPOT_PATH), depot)
-        ENV["JULIA_PKG_PRECOMPILE_AUTO"] = "0"  # Needed when building for non-host platforms
+        
+        # Disabling precompile for non-host platforms
+        precompiled ? delete!(ENV, "JULIA_PKG_PRECOMPILE_AUTO") : ENV["JULIA_PKG_PRECOMPILE_AUTO"] = "0" 
 
         cp(path, joinpath(depot, "dev", name))  # Copy project into dev/
         Pkg.activate(joinpath(depot, "dev", name))
