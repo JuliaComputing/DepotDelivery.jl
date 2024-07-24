@@ -28,9 +28,9 @@ function sandbox(f::Function)
 end
 
 #-----------------------------------------------------------------------------# build
-function build(path::String; platform = Base.BinaryPlatforms.HostPlatform(), verbose=true)
+function build(path::String; platform = Base.BinaryPlatforms.HostPlatform(), verbose=true, depot = mktempdir())
     path = abspath(path)
-    depot = mktempdir()
+    mkpath(depot)
     sandbox() do
         proj_file = joinpath(path, "Project.toml")
         proj_file = isfile(proj_file) ? proj_file : joinpath(path, "JuliaProject.toml")
@@ -44,8 +44,8 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform(), ver
             :project => proj,
             :platform => string(platform)
         )
-        mkdir(joinpath(depot, "config"))
-        mkdir(joinpath(depot, "dev"))
+        mkpath(joinpath(depot, "config"))
+        mkpath(joinpath(depot, "dev", name))
         push!(empty!(DEPOT_PATH), depot)
         ENV["JULIA_PKG_PRECOMPILE_AUTO"] = "0"  # Needed when building for non-host platforms
 
