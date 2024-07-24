@@ -74,6 +74,13 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform(), ver
     return depot
 end
 
+function build(paths::Vector{String}; platform = Base.BinaryPlatforms.HostPlatform(), verbose=true, depot=mktempdir(), precompiled=false)
+    for path in paths
+        build(path; platform=platform, verbose=verbose, depot=depot, precompiled=precompiled)
+    end
+ end
+ 
+
 #-----------------------------------------------------------------------------# startup_script
 startup_script(name) = """
     import Pkg
