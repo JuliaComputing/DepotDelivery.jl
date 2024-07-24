@@ -36,7 +36,7 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform(), ver
         proj_file = isfile(proj_file) ? proj_file : joinpath(path, "JuliaProject.toml")
         isfile(proj_file) || error("No Project.toml or JuliaProject.toml found in `$path`.")
         proj = TOML.parsefile(proj_file)
-        name = proj["name"]
+        name = haskey(proj, "name") ? proj["name"] : Base.basename(Base.dirname(proj_file))
         build_spec = Dict(
             :datetime => Dates.now(),
             :versioninfo => sprint(InteractiveUtils.versioninfo),
