@@ -27,7 +27,24 @@ function sandbox(f::Function)
     end
 end
 
-#-----------------------------------------------------------------------------# build
+#-----------------------------------------------------------------------------#
+"""
+Builds the depot for a specified project.
+
+Arguments:
+- `path::String`: The path to the project directory containing `Project.toml` or `JuliaProject.toml`.
+- `platform::AbstractPlatform`: The target platform for building (default is the host platform).
+- `verbose::Bool`: Whether to display verbose output during the build process (default is `true`).
+- `depot::String`: The path to the depot directory (default is a temporary directory).
+- `precompiled::Bool`: Whether to enable precompilation of packages (default is `false`).
+
+Returns:
+- The path to the built depot.
+
+Example:
+```julia
+depot_path = build("/path/to/your/project")
+"""
 function build(path::String; platform = Base.BinaryPlatforms.HostPlatform(), verbose=true, depot = mktempdir(), precompiled=false)
     path = abspath(path)
     mkpath(depot)
@@ -36,6 +53,7 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform(), ver
         proj_file = isfile(proj_file) ? proj_file : joinpath(path, "JuliaProject.toml")
         isfile(proj_file) || error("No Project.toml or JuliaProject.toml found in `$path`.")
         proj = TOML.parsefile(proj_file)
+        # Defines a project name for Project.toml that don't come from a package
         name = haskey(proj, "name") ? proj["name"] : Base.basename(Base.dirname(proj_file))
         build_spec = Dict(
             :datetime => Dates.now(),
@@ -52,7 +70,7 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform(), ver
         precompiled ? delete!(ENV, "JULIA_PKG_PRECOMPILE_AUTO") : ENV["JULIA_PKG_PRECOMPILE_AUTO"] = "0" 
 
         for file in filter(f -> endswith(f, ".toml"), readdir(path))
-            # Copy .toml files into dev/
+            # Copy only .toml files into dev/
             cp(joinpath(path, file), joinpath(depot, "dev", name, file), force=true) 
         end
  
@@ -74,6 +92,21 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform(), ver
     return depot
 end
 
+"""
+Builds depots for multiple projects specified by their paths.
+
+Arguments:
+- `paths::Vector{String}`: An array of directories of project paths.
+- `platform::AbstractPlatform`: The target platform for building (default is the host platform).
+- `verbose::Bool`: Whether to display verbose output during the build process (default is `true`).
+- `depot::String`: The path to the depot directory (default is a temporary directory).
+- `precompiled::Bool`: Whether to enable precompilation (default is `false`).
+
+Example:
+```julia
+project_paths = ["/path/to/project1", "/path/to/project2"]
+build(project_paths)
+"""
 function build(paths::Vector{String}; platform = Base.BinaryPlatforms.HostPlatform(), verbose=true, depot=mktempdir(), precompiled=false)
     for path in paths
         build(path; platform=platform, verbose=verbose, depot=depot, precompiled=precompiled)
