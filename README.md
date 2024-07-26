@@ -10,9 +10,12 @@
 
 - Bundles all necessary Julia code and artifacts needed to run without internet access.
 - Build for platforms other than the host platform.
+- Can build multiple packages/projects into a single path.
+- Can precompile all dependencies to built path.
 
 ## Usage
 
+### Example 1
 ```julia
 using DepotDelivery: build
 
@@ -24,6 +27,17 @@ path = build(path_to_project; platform = Base.BinaryPlatforms.HostPlatform())
 - Your project lives at `$path/dev/MyProject`.
 - The build settings live in `$path/config/depot_build.toml`
 - Run this in the production environment to get started: `include("$path/config/depot_startup.jl")`.
+
+### Example 2
+```julia
+using DepotDelivery: build
+
+# We can provide a depot_path to share DEPOT_PATH 
+depot_path = "path/to/depot/"
+
+# Assumes `path/Project.toml` exists (or `path/JuliaProject.toml`) in each entry of first argument, and force precompilation.
+path = build(["path/project-1", "path-2/project-2"]; depot=depot_path, precompiled=true)
+```
 
 ## Building for Non-Host Platforms
 
