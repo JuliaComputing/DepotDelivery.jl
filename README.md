@@ -29,6 +29,7 @@ path = build(path_to_project; platform = Base.BinaryPlatforms.HostPlatform())
 - Run this in the production environment to get started: `include("$path/config/depot_startup.jl")`.
 
 ### Example 2
+This example shows how to build a depo path from different Project.toml files, enabling precompilation as needed.
 ```julia
 using DepotDelivery: build
 
