@@ -40,6 +40,8 @@ depot_path = "path/to/depot/"
 path = build(["path/project-1", "path-2/project-2"]; depot=depot_path, precompiled=true)
 ```
 
+Be aware that `build` will copy everything inside those directories to `depot_path/dev/`. Avoid populating those directories with unnecessary files. For example, when starting a new project, it's better to run `julia --project=./isolated_folder/` rather than `julia --project=.`, as in the latter case the `Project.toml` file will coexist with other stuff.
+
 ## Building for Non-Host Platforms
 
 - Use any `Base.BinaryPlatforms.AbstractPlatform` as the `platform` argument.
