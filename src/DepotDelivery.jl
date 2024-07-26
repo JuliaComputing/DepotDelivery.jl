@@ -69,10 +69,7 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform(), ver
         # Disabling precompile for non-host platforms
         precompiled ? delete!(ENV, "JULIA_PKG_PRECOMPILE_AUTO") : ENV["JULIA_PKG_PRECOMPILE_AUTO"] = "0" 
 
-        for file in filter(f -> endswith(f, ".toml"), readdir(path))
-            # Copy only .toml files into dev/
-            cp(joinpath(path, file), joinpath(depot, "dev", name, file), force=true) 
-        end
+        cp(path, joinpath(depot, "dev", name))  # Copy project into dev/
  
         Pkg.activate(joinpath(depot, "dev", name))
         Pkg.instantiate(; platform, verbose)
