@@ -69,7 +69,7 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform(), ver
         # Disabling precompile for non-host platforms
         precompiled ? delete!(ENV, "JULIA_PKG_PRECOMPILE_AUTO") : ENV["JULIA_PKG_PRECOMPILE_AUTO"] = "0" 
 
-        cp(path, joinpath(depot, "dev", name))  # Copy project into dev/
+        cp(path, joinpath(depot, "dev", name), force=true)  # Copy project into dev/
  
         Pkg.activate(joinpath(depot, "dev", name))
         Pkg.instantiate(; platform, verbose)
@@ -85,7 +85,7 @@ function build(path::String; platform = Base.BinaryPlatforms.HostPlatform(), ver
         open(io -> TOML.print(io, build_spec), joinpath(depot, "config", "depot_build.toml"), "w")
         open(io -> print(io, startup_script(name)), joinpath(depot, "config", "depot_startup.jl"), "w")
     end
-
+    
     return depot
 end
 
@@ -108,6 +108,7 @@ function build(paths::Vector{String}; platform = Base.BinaryPlatforms.HostPlatfo
     for path in paths
         build(path; platform=platform, verbose=verbose, depot=depot, precompiled=precompiled)
     end
+    return depot
  end
  
 
