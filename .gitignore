@@ -1,1 +1,4 @@
 /Manifest.toml
+
+test/MultipleWorkflows/**/Manifest.toml
+.vscode/*
