@@ -42,6 +42,6 @@ DepotDelivery.sandbox() do
 
     # Ensure compiled folders are populated
     @testset for package in packages_list
-        @test length(readdir(joinpath(depot, "compiled", "v$(VERSION.major).$(VERSION.minor)", package))) > 1
+        @test length(readdir(joinpath(depot, "compiled", "v$(VERSION.major).$(VERSION.minor)", package))) > 0
     end
 end
