@@ -2,6 +2,7 @@ using DepotDelivery
 using Pkg
 using Test
 
+
 depot = DepotDelivery.build(joinpath(@__DIR__, "TestProject"))
 
 @test DepotDelivery.test(depot)
@@ -32,6 +33,7 @@ DepotDelivery.sandbox() do
     # and the depot path does not point to the default value
     @testset for (proj, package) in zip(proj_paths, packages_list)
         Pkg.activate(proj)
+        Pkg.status()
         package_symbol = Symbol(package)
         @eval using $package_symbol
         package_value = eval(package_symbol)
