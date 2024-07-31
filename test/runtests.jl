@@ -20,9 +20,7 @@ depot2 = DepotDelivery.build(joinpath(@__DIR__, "TestProject"), platform = Pkg.B
 path = joinpath(depot2, "packages", "HDF5_jll")
 
 
-#------------------------------------------------------------------------------------
-#------------------------------------------------------------------------------------
-# Testing multiple workflows
+#-----------------------------------------------------------------------------# Testing multiple workflows
 packages_list = readdir("MultipleWorkflows/");
 proj_paths = joinpath.("./MultipleWorkflows/", packages_list);
 depot = DepotDelivery.build(proj_paths, precompiled=true)
