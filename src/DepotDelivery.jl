@@ -4,6 +4,12 @@ module DepotDelivery
     eval(Expr(:public, :build))
 end
 
+@static if Sys.iswindows()
+    delim = ';'
+else
+    delim = ':'
+end
+
 #-----------------------------------------------------------------------------# build
 """
     build(src = pwd(), dest=mktempdir(); triplet, platform, verbose, precompiled)
@@ -23,7 +29,7 @@ Example:
     depot_path = build("/path/to/your/project")
 """
 function build(
-        src::String = pwd(),  # paths separated with ':'
+        src::String = pwd(),  # paths separated with ':' (';' on Windows)
         dest::String = joinpath(mktempdir(), "depot");
         triplet = nothing,
         platform = Base.BinaryPlatforms.HostPlatform(),
@@ -38,7 +44,7 @@ function build(
     read(cmd, String)
 end
 
-build(sources::Vector{String}, dest::String=joinpath(mktempdir(), "depot"); kw...) = build(join(sources, ':'), dest; kw...)
+build(sources::Vector{String}, dest::String=joinpath(mktempdir(), "depot"); kw...) = build(join(sources, delim), dest; kw...)
 
 
 

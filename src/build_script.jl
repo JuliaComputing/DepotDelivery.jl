@@ -14,7 +14,8 @@ get_project_name(path) = (p = get_project(path); isnothing(p.name) ? splitpath(p
 #-----------------------------------------------------------------------------# ARGS
 verbose = verbose == "true"
 offline = offline == "true"
-source_dict = Dict(x => get_project_name(x) for x in abspath.(split(sources, ':')))
+delim = Base.Sys.iswindows() ? ';' : ':'
+source_dict = Dict(x => get_project_name(x) for x in abspath.(split(sources, delim)))
 platform = Base.parse(Base.BinaryPlatforms.Platform, triplet)
 
 for src in keys(source_dict)
