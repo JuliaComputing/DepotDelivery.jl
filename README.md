@@ -1,6 +1,7 @@
 # DepotDelivery
 
 [![Build Status](https://github.com/juliacomputing/DepotDelivery.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/juliacomputing/DepotDelivery.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![codecov](https://codecov.io/gh/JuliaComputing/DepotDelivery.jl/graph/badge.svg?token=ezz47Ux5Md)](https://codecov.io/gh/JuliaComputing/DepotDelivery.jl)
 
 <p align="center"><b>DepotDelivery</b> bundles a Julia project into a standalone depot (contents of a `.julia/` directory).</p>
 
