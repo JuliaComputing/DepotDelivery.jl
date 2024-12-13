@@ -1,6 +1,8 @@
 module DepotDelivery
 
-public build
+@static if VERSION > v"1.11"
+    eval(Expr(:public, :build))
+end
 
 #-----------------------------------------------------------------------------# build
 """
