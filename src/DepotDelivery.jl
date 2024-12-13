@@ -4,7 +4,7 @@ public build
 
 #-----------------------------------------------------------------------------# build
 """
-    build(src = pwd(), dest; triplet, platform, verbose, precompiled)
+    build(src = pwd(), dest=mktempdir(); triplet, platform, verbose, precompiled)
 
 Arguments:
 - `src = pwd()`: A `String`/`Vector{String}` of the project path/paths containing `Project.toml` or `JuliaProject.toml` files.

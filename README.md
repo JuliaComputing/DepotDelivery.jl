@@ -2,54 +2,66 @@
 
 [![Build Status](https://github.com/juliacomputing/DepotDelivery.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/juliacomputing/DepotDelivery.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
-<p align="center"><b>DepotDelivery</b> bundles a Julia project into a standalone depot that can run in air-gapped environments.</p>
+<p align="center"><b>DepotDelivery</b> bundles a Julia project into a standalone depot (contents of a `.julia/` directory).</p>
 
 
 
 ## Features
 
-- Bundles all necessary Julia code and artifacts needed to run without internet access.
+- Bundles all Julia code of one or more projects.
+- Can be deployed in air-gapped environments.
 - Build for platforms other than the host platform.
-- Can build multiple packages/projects into a single path.
 - Can precompile all dependencies to built path.
 
 ## Usage
 
-### Example 1
 ```julia
-using DepotDelivery: build
-
-# Assumes `path/Project.toml` exists (or `path/JuliaProject.toml`)
-path = build(path_to_project; platform = Base.BinaryPlatforms.HostPlatform())
+build(src = pwd(), dest=mktempdir(); triplet, platform, verbose, precompiled)
 ```
 
-- `path` is the ready-to-ship depot.
-- Your project lives at `$path/dev/MyProject`.
-- The build settings live in `$path/config/depot_build.toml`
-- Run this in the production environment to get started: `include("$path/config/depot_startup.jl")`.
+Arguments:
+- `src = pwd()`: A `String`/`Vector{String}` of the project path/paths containing `Project.toml` or `JuliaProject.toml` files.
+- `dest::String = <tempdir>`: The depot directory to populate.
+- `platform::AbstractPlatform = <host platform>`: The target `Base.BinaryPlatforms.Platform`.
+- `triplet = nothing`: The target triplet of the platform to build for.  If not `nothing`, it overrides `platform`.
+- `verbose = true`: Whether to display verbose output during the build process (default is `true`).
+- `precompiled = false`: Whether to enable precompilation of packages.
 
-### Example 2
-This example shows how to build a depo path from different Project.toml files, enabling precompilation as needed.
+Returns:
+- `dest::String`
+
+
+## Examples
+
 ```julia
-using DepotDelivery: build
+using DepotDelivery
 
-# We can provide a depot_path to share DEPOT_PATH 
-depot_path = "path/to/depot/"
+# `path/Project.toml` (or `path/JuliaProject.toml`) must exist
+path = abspath(joinpath(pathof(DepotDelivery), "..", ".."))
 
-# Assumes `path/Project.toml` exists (or `path/JuliaProject.toml`) in each entry of first argument, and force precompilation.
-path = build(["path/project-1", "path-2/project-2"]; depot=depot_path, precompiled=true)
+depot = DepotDelivery.build(path)
 ```
 
-Be aware that `build` will copy everything inside those directories to `depot_path/dev/`. Avoid populating those directories with unnecessary files. For example, when starting a new project, it's better to run `julia --project=./isolated_folder/` rather than `julia --project=.`, as in the latter case the `Project.toml` file will coexist with other stuff.
+Then in your production environment, either:
+  1. Replace the `.julia/` directory with `depot`
+  2. Run `include(joinpath(depot, "config", "startup.jl"))` to begin your Julia session.
 
-## Building for Non-Host Platforms
+## Notes
 
-- Use any `Base.BinaryPlatforms.AbstractPlatform` as the `platform` argument.
+### General
+
+Be aware that `build` will copy everything inside the source directories to `depot/dev/`. Avoid populating those directories with unnecessary files. For example, when starting a new project, it's better to run `julia --project=./isolated_folder/` rather than `julia --project=.`, as in the latter case the `Project.toml` file will coexist with other stuff.
+
+### Building for Non-Host Platforms
+
+- Use any `Base.BinaryPlatforms.AbstractPlatform` as the `platform` or [target triplet](https://wiki.osdev.org/Target_Triplet) as the `triplet`.
 - See [Julia's supported OS/architectures](https://www.julialang.org/downloads/index.html#supported_platforms).
 - See `?Base.BinaryPlatforms.Platform` and the types in `Pkg.BinaryPlatforms` for details, e.g.
 
 ```julia
 import Pkg
+
+Base.BinaryPlatforms.HostPlatform()
 
 Base.BinaryPlatforms.Platform("windows", "x86_64"; cuda == "10.1")
 
@@ -59,8 +71,3 @@ Pkg.BinaryPlatforms.MacOS()
 Pkg.BinaryPlatforms.Linux(:powerpc64le)
 Pkg.BinaryPlatforms.FreeBSD(:armv7l)
 ```
-
-## Limitations
-
-- The parts of your dependencies that expect/require internet access will not work (this should be expected).
-- It's assumed your package is completely standalone, and won't need to be used with packages outside of the provided project file.
